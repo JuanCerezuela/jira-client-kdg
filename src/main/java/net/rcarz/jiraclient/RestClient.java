@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import net.sf.json.JSON;
@@ -46,8 +47,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 
 /**
@@ -185,11 +189,16 @@ public class RestClient {
     private JSON request(HttpEntityEnclosingRequestBase req, File file)
             throws RestException, IOException {
             if (file != null) {
-            	File fileUpload = file;
-            	req.setHeader("X-Atlassian-Token","nocheck");
-            	MultipartEntity ent = new MultipartEntity();
-            	ent.addPart("file", new FileBody(fileUpload));
-            	req.setEntity(ent);
+                File fileUpload = file;
+                req.setHeader("X-Atlassian-Token","nocheck");
+                HttpEntity ent = MultipartEntityBuilder.create()
+                        .addPart("file", new FileBody(fileUpload, ContentType.DEFAULT_BINARY, new String (file.getName().getBytes(), Charset.forName("UTF-8"))))
+                        .setCharset(Charset.forName("UTF-8"))
+                        .setMode(HttpMultipartMode.RFC6532)
+                        .build();
+                //MultipartEntity ent = new MultipartEntity ();
+                //ent.addPart("file", new FileBody(fileUpload));
+                req.setEntity(ent);
             }
             return request(req);
         }

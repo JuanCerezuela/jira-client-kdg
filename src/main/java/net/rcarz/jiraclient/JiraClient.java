@@ -54,6 +54,7 @@ public class JiraClient {
      */
     public JiraClient(String uri, ICredentials creds) {
         DefaultHttpClient httpclient = new DefaultHttpClient();
+        httpclient.getParams().setParameter("http.protocol.content-charset", "UTF-8");
 
         restclient = new RestClient(httpclient, creds, URI.create(uri));
 
